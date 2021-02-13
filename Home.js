@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, Button, Alert, TextInput, ScrollV
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { connect } from 'react-redux';
-import  { newTransactionAdd, newTransactionMinus } from './AllActions'
+import  { newTransactionAdd, newTransactionMinus, resetAll } from './AllActions'
 
 let Home = (props) => {
     const [spendValue, onChangeSpendValue] = useState('0.00')
@@ -24,7 +24,24 @@ let Home = (props) => {
             ],
             { cancelable: false }
           );
-        
+    }
+
+    const nuclearResetHandler = () => { // reset balance
+        Alert.alert(
+            "Reset confirmation",
+            "Caution! You are trying to reset the balance to zero and clear all transactions. Are you sure to do this?",
+            [
+              {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+                style: "cancel"
+              },
+              { text: "OK", onPress: () => {
+                  props.reset()
+              } }
+            ],
+            { cancelable: false }
+          );
     }
     return (
         <SafeAreaView style={styles.container}>
@@ -38,10 +55,13 @@ let Home = (props) => {
                         <TextInput style={{ height: 40, width: 120, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeSpendValue(text)} value={spendValue}></TextInput><Button title="SPEND" onPress={spendMoneyHandler}></Button> 
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
-                        <Button title="COLLECT STAMP"></Button> 
+                        <Button title="COLLECT STAMP" onPress={() => props.navigation.navigate('Scanstamp')}></Button> 
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
                         <Text style={{color: 'blue'}} onPress={() => props.navigation.navigate('Transactions')}>View transactions</Text>
+                    </View>
+                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 100}}>
+                        <Text style={{color: 'blue'}} onPress={nuclearResetHandler}>Reset balance (!)</Text>
                     </View>
                 </View>
             </ScrollView>
@@ -85,6 +105,9 @@ return {
     },
     minusTransaction: (description, amount) => {
         dispatch(newTransactionMinus(description, amount));
+    },
+    reset: () => {
+        dispatch(resetAll());
     }
 };
 };
