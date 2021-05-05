@@ -10,7 +10,7 @@ const allReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'ADD_TRANSACTION':
         state_prime.balance += action.amount 
-        state_prime.transactions.unshift({description: action.description, date: Date(), amount: action.amount})
+        state_prime.transactions.unshift({description: action.description, date: Date(), amount: action.amount, sn: action.sn})
         return state_prime
     case 'MINUS_TRANSACTION':
         state_prime.balance -= action.amount 

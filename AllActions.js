@@ -1,8 +1,9 @@
-export const newTransactionAdd = (description, amount) => (
+export const newTransactionAdd = (description, amount, sn) => (
     {
       type: 'ADD_TRANSACTION',
       description: description, 
-      amount: amount
+      amount: amount,
+      sn: sn
     }
   );
 export const newTransactionMinus = (description, amount) => (
