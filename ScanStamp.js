@@ -14,52 +14,27 @@ let ScanStamp = (props) => {
 
     const onSuccess = (e) => {
         try {
-        let valeurs = e.data.split('|')
-        let value_contained = valeurs[1]
-        let amount = value_contained.slice(0, value_contained.length-3)
-        props.addTransaction('Salary stamp collection', Number(amount))
-        props.navigation.popToTop()
+        // Open up a new screen to look up the serial number in the database, let user choose the subtask, or take the salary of the stamp
+        let task = JSON.parse(e.data)
+        if (task.sn)
+        {
+            props.navigation.navigate('SubTasks', {'sn': task.sn})
+        }
+        else
+        {
+            ToastAndroid.showWithGravity(
+                "An invalid stamp was detected! Try again with a valid stamp!",
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+            );
+            props.navigation.popToTop()
+        }
         } catch(ex) {
-            // Not a valid salary stamp, must be a task stamp
-            let task = JSON.parse(e.data)
-            let amount = task.finish    
-            let expiryDate = moment(task.expired)
-            let sn = task.sn // serial number
-            let today = moment()
-            
-            // Check if serial number is already in the database
-            let foundTransacs = props.all.transactions.findIndex((t,idx) => {
-                if (t.sn == sn)
-                {
-                    return true
-                }
-            })
-
-            if (foundTransacs != -1)
-            {
-                // Serial already existed
-                ToastAndroid.showWithGravity(
-                    "The check has already been taken!",
-                    ToastAndroid.SHORT,
-                    ToastAndroid.CENTER
-                  );
-                return
-            }
-
-            // Check if stamp expired
-            if (expiryDate.diff(today) > 0)
-            {
-                props.addTransaction('Pay check: ' + task.name + '. SN: ' + task.sn, Number(amount), task.sn)
-                props.navigation.popToTop()
-            }
-            else
-            {
-                ToastAndroid.showWithGravity(
-                    "The stamp has expired and cannot be collected.",
-                    ToastAndroid.SHORT,
-                    ToastAndroid.CENTER
-                  );
-            }
+            ToastAndroid.showWithGravity(
+                "The stamp has expired and cannot be collected.",
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+            );
         }
     }
     

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "774049026794",
+    "project_id": "payme-95fc4",
+    "storage_bucket": "payme-95fc4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774049026794:android:e836393fb69f479e963d93",
+        "android_client_info": {
+          "package_name": "com.paymemobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "774049026794-5ji84spf8hsdni6n02234pdvvsqh8gvn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2mEQv_0dvbKV9Hj7oe6DK8DB8So9D4iE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774049026794-5ji84spf8hsdni6n02234pdvvsqh8gvn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

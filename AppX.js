@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import Home from './Home'
 import Transactions from './Transactions'
 import ScanStamp from './ScanStamp'
+import SubTasks from './SubTasks'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react';
 import allReducers from './AllReducers'
@@ -51,6 +52,7 @@ const AppX = () => {
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Transactions" component={Transactions} />
             <Stack.Screen name="Scanstamp" component={ScanStamp} />
+            <Stack.Screen name="SubTasks" component={SubTasks} />
           </Stack.Navigator>
         </NavigationContainer>
     </PersistGate>
