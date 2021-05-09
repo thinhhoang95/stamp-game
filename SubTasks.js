@@ -3,6 +3,7 @@ import { View, SafeAreaView, FlatList, Text, TouchableWithoutFeedback, Alert } f
 import { connect } from 'react-redux'
 import firestore from '@react-native-firebase/firestore';
 import  { newTransactionAdd } from './AllActions'
+import moment from 'moment';
 
 let SubTasks = (props) => {
 
@@ -16,8 +17,22 @@ let SubTasks = (props) => {
         let vsubtasks = []
         let t = snapshot.data()
         let sta = t.subs
+        let taskExpiryTime = moment(t.expired) 
+        if (taskExpiryTime.diff(moment()) < 0)
+        {
+          // The task has expired
+          Alert.alert(
+            "Check expired",
+            "You cannot claim this check because it has expired!",
+            [
+              { text: "OK", onPress: () => { props.navigation.popToTop() } }
+            ]
+          );
+          return // Do not proceed further
+        }
         sta.forEach((st) => {
           let snIdx = props.all.transactions.findIndex(x => x.sn == st.sn)
+          
           if (snIdx == -1)
           {
             vsubtasks.push(
@@ -104,7 +119,6 @@ let SubTasks = (props) => {
           { text: "OK", onPress: () => { props.navigation.popToTop() } }
         ]
       );
-
     }
 
     const renderItem = ({item}) => {
