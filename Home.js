@@ -60,8 +60,14 @@ let Home = (props) => {
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
                         <Text style={{color: 'blue'}} onPress={() => props.navigation.navigate('Transactions')}>View transactions</Text>
                     </View>
-                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 100}}>
+                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
+                        <Text style={{color: 'blue'}} onPress={() => props.navigation.navigate('Salary')}>Claim salary</Text>
+                    </View>
+                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 80}}>
                         <Text style={{color: 'blue'}} onPress={nuclearResetHandler}>Reset balance (!)</Text>
+                    </View>
+                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
+                        <Text>Designed by Thinh Hoang in Toulouse, France</Text>
                     </View>
                 </View>
             </ScrollView>

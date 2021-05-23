@@ -22,7 +22,6 @@ let Transactions = (props) => {
     const renderItem = ({item}) => {
         return(
             <View>
-
                 <Text>Date: {item.date}</Text>
                 <Text>Amount: {item.amount}</Text>
                 <Text>{item.description}</Text>
@@ -32,7 +31,7 @@ let Transactions = (props) => {
 
     return (
         <SafeAreaView style={styles.container}>
-                <FlatList data={props.all.transactions.slice(0, 100)} renderItem={renderItem} ItemSeparatorComponent={flatListItemSeparator}>
+                <FlatList data={props.all.transactions.slice(0, 100)} renderItem={renderItem} ItemSeparatorComponent={flatListItemSeparator} keyExtractor={(item) => item.sn}>
                 </FlatList>
         </SafeAreaView>
     )
