@@ -16,9 +16,21 @@ let ScanStamp = (props) => {
         try {
         // Open up a new screen to look up the serial number in the database, let user choose the subtask, or take the salary of the stamp
         let task = JSON.parse(e.data)
+        try {
+            if (task.regular == 1)
+            {
+                props.navigation.navigate('Regular', {'sn': task.sn})
+                return
+            }
+        } catch (e)
+        {
+            // This is not a regular stamp, check if it is a subtasks stamp
+            console.log("Not a regular stamp")
+        }
         if (task.sn)
         {
             props.navigation.navigate('SubTasks', {'sn': task.sn})
+            return
         }
         else
         {
@@ -28,6 +40,7 @@ let ScanStamp = (props) => {
                 ToastAndroid.CENTER
             );
             props.navigation.popToTop()
+            return
         }
         } catch(ex) {
             ToastAndroid.showWithGravity(

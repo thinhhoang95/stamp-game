@@ -7,6 +7,8 @@ import Transactions from './Transactions'
 import ScanStamp from './ScanStamp'
 import SubTasks from './SubTasks'
 import Salary from './Salary'
+import HabitsScreen from './HabitsScreen'
+import Regular from './Regular'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react';
 import allReducers from './AllReducers'
@@ -55,6 +57,8 @@ const AppX = () => {
             <Stack.Screen name="Scanstamp" component={ScanStamp} />
             <Stack.Screen name="SubTasks" component={SubTasks} />
             <Stack.Screen name="Salary" component={Salary} />
+            <Stack.Screen name="Habits" component={HabitsScreen} />
+            <Stack.Screen name="Regular" component={Regular} />
           </Stack.Navigator>
         </NavigationContainer>
     </PersistGate>
