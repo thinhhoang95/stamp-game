@@ -4,9 +4,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { connect } from 'react-redux';
 import  { newTransactionAdd, newTransactionMinus, resetAll } from './AllActions'
+import moment from 'moment'
 
 let Home = (props) => {
     const [spendValue, onChangeSpendValue] = useState('0.00')
+
     const spendMoneyHandler = () => { // spend money onclick
         Alert.alert(
             "Spending confirmation",
@@ -18,7 +20,7 @@ let Home = (props) => {
                 style: "cancel"
               },
               { text: "OK", onPress: () => {
-                props.minusTransaction('Debit (widthdrawal)', spendValue)
+                props.minusTransaction('Debit (withdrawal)', spendValue)
                 onChangeSpendValue('0.00')
               } }
             ],
@@ -43,14 +45,95 @@ let Home = (props) => {
             { cancelable: false }
           );
     }
+
+    const getTodayEarnedAmount = (transactions) => {
+        // Filter out today's transactions (from 2AM) 
+        let mtodayEarned = 0
+        let mtodaySpent = 0
+        const todayTrans = transactions.filter((t) => 
+        {
+            let tDate = moment(t.date)
+            let now = moment() 
+            if (now.get('h')<2) {
+                now.add(-1, 'd')
+            }
+            now.set('hour', 2) // set to 2 AM of today (or yesterday if we work late)
+            now.set('minute', 0)
+            now.set('second', 0)
+            now.add(1, 'd')
+            // console.log(now.format("DD/MM HH:mm"))
+            return now.diff(tDate, 'hour') <= 24
+        })
+        todayTrans.forEach((t) => {
+            mtodayEarned += t.description.indexOf('withdrawal') == -1 ? Number(t.amount) : 0
+            mtodaySpent += t.description.indexOf('withdrawal') >= 0 ? Number(t.amount) : 0
+        })
+        return {mtodayEarned, mtodaySpent}
+    }
+
+    
+    const getThisWeekEarnedAmount = (transactions) => {
+        // Filter out today's transactions (from 2AM) 
+        let mtodayEarned = 0
+        let mtodaySpent = 0
+        const todayTrans = transactions.filter((t) => 
+        {
+            let tDate = moment(t.date)
+            let now = moment() 
+            now = now.startOf('week')
+            now.set('hour', 2) // set to 2 AM of Sunday
+            now.add(7, 'd')
+            return now.diff(tDate, 'hour') <= 168 // 1 week has 768 hours
+        })
+        todayTrans.forEach((t) => {
+            mtodayEarned += t.description.indexOf('withdrawal') == -1 ? Number(t.amount) : 0
+            mtodaySpent += t.description.indexOf('withdrawal') >= 0 ? Number(t.amount) : 0
+        })
+        return {mtodayEarned, mtodaySpent}
+    }
+
+    const getThisMonthEarnedAmount = (transactions) => {
+        // Filter out today's transactions (from 2AM) 
+        let mtodayEarned = 0
+        let mtodaySpent = 0
+        const todayTrans = transactions.filter((t) => 
+        {
+            let tDate = moment(t.date)
+            let now = moment() 
+            now = now.startOf('month')
+            now.set('hour', 2) // set to 2 AM of 1st of month
+            now.set('minute', 0)
+            let nextMonth = moment().startOf('month').add(1, 'month')
+            nextMonth.set('hour', 2)
+            nextMonth.set('minute', 0)
+            let monthDuration = nextMonth.diff(now, 'hours')
+            return nextMonth.diff(tDate, 'hour') <= monthDuration // 1 week has 768 hours
+        })
+        // console.log(todayTrans)
+        todayTrans.forEach((t) => {
+            mtodayEarned += t.description.indexOf('withdrawal') == -1 ? Number(t.amount) : 0
+            mtodaySpent += t.description.indexOf('withdrawal') >= 0 ? Number(t.amount) : 0
+        })
+        return {mtodayEarned, mtodaySpent}
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
                 <View style={styles.money_bg}>
                     <Text style={styles.money_bg_text}> Your balance is </Text>
                     <Text style={styles.balance_amount}> { Number(props.all.balance).toFixed(2) } </Text>
+                    <Text style={styles.today_earned}>Daily: +{getTodayEarnedAmount(props.all.transactions.slice(-50)).mtodayEarned.toFixed(2)} / -{getTodayEarnedAmount(props.all.transactions.slice(-50)).mtodaySpent.toFixed(2)}</Text>
+                    <Text style={styles.today_earned}>Weekly: +{getThisWeekEarnedAmount(props.all.transactions.slice(-150)).mtodayEarned.toFixed(2)} / -{getThisWeekEarnedAmount(props.all.transactions.slice(-150)).mtodaySpent.toFixed(2)}</Text>
+                    <Text style={styles.today_earned}>Monthly: +{getThisMonthEarnedAmount(props.all.transactions.slice(-400)).mtodayEarned.toFixed(2)} / -{getThisMonthEarnedAmount(props.all.transactions.slice(-400)).mtodaySpent.toFixed(2)}</Text>
+                
                 </View>
                 <View style={styles.controls_bg}>
+                    <View style={{alignSelf: 'center', flex: 1, paddingBottom: 40, paddingHorizontal: 10}}>
+                        <Text style={{textAlign: 'center'}}>Keep your belief and insight. You will become a wiser, more knowledgable and you will enjoy your success later.</Text>
+                        <Text style={{fontWeight: 'bold', textAlign: 'center'}}> Hard work puts you in the place where luck shall find you.</Text>
+                        <Text style={{fontWeight: 'bold', color: 'blue', textAlign: 'center'}}> Hold on and Keep on going!</Text>
+                    </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row'}}>
                         <TextInput style={{ height: 40, width: 120, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeSpendValue(text)} value={spendValue}></TextInput><Button title="SPEND" onPress={spendMoneyHandler}></Button> 
                     </View>
@@ -86,7 +169,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'blue',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 120
+        paddingVertical: 60
     },
     controls_bg: {
         flex: 1,
@@ -100,6 +183,11 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 42,
         fontWeight: 'bold'
+    },
+    today_earned: {
+        color: 'white',
+        fontSize: 14,
+        marginTop: 6
     }
 })
 

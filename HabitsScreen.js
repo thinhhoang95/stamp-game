@@ -16,13 +16,20 @@ let HabitsScreen = (props) => {
   const [habits, setHabits] = useState([]);
 
   const adjustTimeTo2AM = (date) => {
-    let nextReset = moment().set('year', date.get('year'))
-    nextReset.set('month', date.get('month'))
-    nextReset.set('date', date.get('date'))
-    nextReset.set('hour', 2)
-    nextReset.set('minute', 0)
-    return nextReset
-  }
+    let nextReset = moment().set('year', date.get('year'));
+    let now = moment()
+    nextReset.set('month', date.get('month'));
+    nextReset.set('date', date.get('date'));
+    if (now.get('hour') < 2)
+    {
+      // If we have passed 12AM but not 2AM today, this function should not turn the clock forward
+      // but instead, the clock must be ensured to be always turned backward
+      nextReset.add(-1, 'd')
+    }
+    nextReset.set('hour', 2);
+    nextReset.set('minute', 0);
+    return nextReset;
+  };
 
   useEffect(() => {
     // Query the habits and display into the list
@@ -35,8 +42,10 @@ let HabitsScreen = (props) => {
         snapshot.forEach((sns) => {
           let doc = sns.data();
           doc.lastReset = moment(doc.lastDone.toDate()).valueOf(); // unix timestamp in milisecs
-          doc.nextReset = adjustTimeTo2AM(moment(doc.lastReset)).add(doc.autoReset, 'day').valueOf()
-          console.log(moment(doc.lastReset).format("DD/MM/YYYY HH:mm:ss"))
+          doc.nextReset = adjustTimeTo2AM(moment(doc.lastReset))
+            .add(doc.autoReset, 'day')
+            .valueOf();
+          //console.log(moment(doc.lastReset).format('DD/MM/YYYY HH:mm:ss'));
           // For expired habits, reset the lastDone date to today
           if (now > doc.nextReset) {
             console.log(
@@ -45,9 +54,13 @@ let HabitsScreen = (props) => {
                 '. Reset the payment to minimum level due to loss of streak',
             );
             doc.lastReset = adjustTimeTo2AM(moment()).valueOf(); // adjust to 2AM today
-            doc.nextReset = moment(doc.lastReset).add(doc.autoReset, 'd').valueOf(); 
+            doc.nextReset = moment(doc.lastReset)
+              .add(doc.autoReset, 'd')
+              .valueOf();
             doc.current = doc.start;
-            doc.lastDone = firebase.firestore.Timestamp.fromDate(moment(doc.lastReset).toDate());
+            doc.lastDone = firebase.firestore.Timestamp.fromDate(
+              moment(doc.lastReset).toDate(),
+            );
             firestore()
               .collection('habits')
               .doc(doc.id)
@@ -55,12 +68,23 @@ let HabitsScreen = (props) => {
                 ...doc,
                 lastDone: firebase.firestore.Timestamp.fromDate(new Date()),
                 current: doc.start,
-                count: 0
+                count: 0,
               });
           }
+          // Append the count and maxCount fields if the doc in database does not have those.
+          // By default, these fields not existing means it has only to be done ONCE every x days 
           if (!doc.hasOwnProperty('count')) {
             doc.count = 0;
+          }
+          if (!doc.hasOwnProperty('maxCount')) {
             doc.maxCount = 1;
+          }
+          // Assign a flag of "tomorrow" so that these tasks are highlighted
+          if (moment(doc.nextReset).diff(moment(), 'h') < 25)
+          {
+            doc.tomorrow = true
+          } else {
+            doc.tomorrow = false
           }
           mHabits.push(doc);
         });
@@ -68,7 +92,7 @@ let HabitsScreen = (props) => {
         mHabits = mHabits.filter((x) => {
           return now > x.lastReset;
         });
-        mHabits = mHabits.sort((a,b) => -b.nextReset + a.nextReset)
+        mHabits = mHabits.sort((a, b) => -b.nextReset + a.nextReset);
         setHabits(mHabits);
       });
   }, []);
@@ -100,71 +124,115 @@ let HabitsScreen = (props) => {
     return result.join('');
   };
 
-  const payMyHabit = (id) => {
-    // On tap, add a transaction, update the lastDone
-    const docRef = firestore().collection('habits').doc(id);
-    let h = habits.find((x) => x.id == id);
-
-    if (h.count + 1 == h.maxCount) {
-      let newCurrent = h.current + h.increment;
-      docRef.set({
-        ...h,
-        lastDone: firebase.firestore.Timestamp.fromDate(
-          moment(h.nextReset).toDate(),
-        ),
-        current: newCurrent,
-      });
-
-      props.addTransaction(
-        'Habit payment: ' + h.name + '.',
-        h.current,
-        make_serial(5, 6),
-      );
-
-      Alert.alert(
-        'Habit Checked',
-        'Congratulations for extending the streak. Keep the momentum going! The payment will continue to increase.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              props.navigation.popToTop();
-            },
-          },
-        ],
-      );
-    } 
-    else {
-      docRef.set({
-        ...h,
-        count: h.count + 1
-      })
-      Alert.alert(
-        'Keep going',
-        'Habit count was increased.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              props.navigation.popToTop();
-            },
-          },
-        ],
-      );
-    }
+  const getDurationInEnglish = (start, end) => {
+    const duration = moment.duration(moment(end).diff(moment(start)));
+  
+    //Get Days
+    const days = Math.floor(duration.asDays()); // .asDays returns float but we are interested in full days only
+    const daysFormatted = days ? `${days}d ` : ''; // if no full days then do not display it at all
+  
+    //Get Hours
+    const hours = duration.hours();
+    const hoursFormatted = `${hours}h `;
+  
+    //Get Minutes
+    const minutes = duration.minutes();
+    const minutesFormatted = `${minutes}m`;
+  
+    return [daysFormatted, hoursFormatted, minutesFormatted].join('');
   }
 
+  const payMyHabit = (id) => {
+    // Display an alert to prevent mistouches
+    Alert.alert(
+      'Check habit?',
+      'Do you want to check this habit? This transaction cannot be undone!',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            // >>>>>
+            // On tap, add a transaction, update the lastDone
+            const docRef = firestore().collection('habits').doc(id);
+            let h = habits.find((x) => x.id == id);
+
+            if (h.count + 1 == h.maxCount) {
+              let newCurrent =
+                h.current + h.increment > h.max
+                  ? h.max
+                  : h.current + h.increment;
+              docRef.set({
+                ...h,
+                lastDone: firebase.firestore.Timestamp.fromDate(
+                  moment(h.nextReset).toDate(),
+                ),
+                current: newCurrent,
+                count: 0,
+              });
+
+              props.addTransaction(
+                'Habit payment: ' + h.name + '.',
+                h.current,
+                make_serial(5, 6),
+              );
+
+              Alert.alert(
+                'Habit Checked',
+                'Congratulations for extending the streak. Keep the momentum going! The payment will continue to increase.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      props.navigation.popToTop();
+                    },
+                  },
+                ],
+              );
+            } else {
+              docRef.set({
+                ...h,
+                count: h.count + 1,
+              });
+              Alert.alert('Keep going', 'Habit count was increased.', [
+                {
+                  text: 'OK',
+                  onPress: () => {
+                    props.navigation.popToTop();
+                  },
+                },
+              ]);
+            }
+            // <<<<< end of on OK tap confirm check habit
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
 
   const renderItem = ({item}) => {
+    //console.log(moment(item.nextReset).format("DD/MM/YYYY HH:mm"))
+    //console.log(moment().format("DD/MM/YYYY HH:mm"))
+    let howLongTillNextReset = getDurationInEnglish(moment.duration(moment(item.nextReset).diff(moment())))
     return (
       <TouchableWithoutFeedback onPress={() => payMyHabit(item.id)}>
         <View>
-          <Text>Habit: {item.name}</Text>
+          <Text style={{fontWeight: 'bold'}}>{item.tomorrow ? "(EXP+1) " : ""}{item.name}</Text>
           <Text>Description: {item.descr}</Text>
-          <Text>Current payment: {item.current}</Text>
+          <Text>Current payment: {item.current.toFixed(2)}</Text>
           <Text>Reset every: {item.autoReset} day(s)</Text>
-          <Text>Next reset: {moment(item.nextReset).format("ddd DD/MM/YYYY HH:mm:ss")}</Text>
-          <Text>Count: {item.count} / {item.maxCount} </Text>
+          <Text>
+            Next reset:{' '}
+            {moment(item.nextReset).format('DD/MM HH:mm')} in {getDurationInEnglish(moment(), moment(item.nextReset))}
+          </Text>
+          <Text>
+            Count: {item.count} / {item.maxCount}{' '}
+          </Text>
         </View>
       </TouchableWithoutFeedback>
     );

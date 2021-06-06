@@ -12,6 +12,11 @@ export const newTransactionMinus = (description, amount) => (
     description: description,
     amount: amount
 });
+export const restoreBackup = (balance, transactions) => ({
+  type: 'RESTORE_BACKUP',
+  balance: balance,
+  transactions: transactions
+});
 export const resetAll = () => (
 {
     type: 'RESET'

@@ -20,6 +20,10 @@ const allReducer = (state = INITIAL_STATE, action) => {
         state_prime.balance = 0
         state_prime.transactions = []
         return state_prime
+    case 'RESTORE_BACKUP':
+      state_prime.balance = action.balance
+      state_prime.transactions = action.transactions
+      return state_prime
     default:
       return state
   }
