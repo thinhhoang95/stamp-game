@@ -17,6 +17,13 @@ export const restoreBackup = (balance, transactions) => ({
   balance: balance,
   transactions: transactions
 });
+export const addAccumulatedTU = (tu) => ({
+  type: 'ADD_TU',
+  tu: tu
+});
+export const resetAccumulatedTU = () => ({
+  type: 'RESET_TU'
+});
 export const resetAll = () => (
 {
     type: 'RESET'

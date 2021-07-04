@@ -139,17 +139,20 @@ let Home = (props) => {
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
                         <Button title="COLLECT STAMP" onPress={() => props.navigation.navigate('Scanstamp')}></Button> 
-                    </View>
-                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
+                        <View style={{width: 20}}></View>
                         <Button title="REWARD HABITS" color='green' onPress={() => props.navigation.navigate('Habits')}></Button>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
                         <Button title="CLAIM SALARY" color='black' onPress={() => props.navigation.navigate('Salary')}></Button>
+                        <View style={{width: 10}}></View>
+                        <Button title="LIST TASKS" color='#d4c41c' onPress={() => props.navigation.navigate('AllTasks')}></Button>
+                        <View style={{width: 10}}></View>
+                        <Button title="TIME DECLARE" color='#e834eb' onPress={() => props.navigation.navigate('DeclareTU')}></Button>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
                         <Text style={{color: 'blue', padding: 8}} onPress={() => props.navigation.navigate('Transactions')}>View transactions</Text>
                     </View>
-                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
+                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 40}}>
                         <Button title="RESET BALANCE" color="red" onPress={nuclearResetHandler}></Button>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 8}}>
@@ -169,7 +172,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'green',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 60
+        paddingVertical: 30
     },
     controls_bg: {
         flex: 1,
@@ -177,12 +180,13 @@ const styles = StyleSheet.create({
     },
     money_bg_text: {
         color: 'white',
-        fontSize: 24
+        fontSize: 24,
+        fontWeight: 'bold'
     },
     balance_amount: {
         color: 'white',
         fontSize: 42,
-        fontWeight: 'bold'
+        fontWeight: '300'
     },
     today_earned: {
         color: 'white',

@@ -246,14 +246,12 @@ let HabitsScreen = (props) => {
     return (
       <TouchableWithoutFeedback onPress={() => payMyHabit(item.id)}>
         <View style={{margin: 16}}>
-          <Text style={{fontWeight: 'bold', color: item.tomorrow?'red':'black'}}>{item.tomorrow ? "(EXP+1) " : ""}{item.name}</Text>
-          <Text>Description: {item.descr}</Text>
-          <Text style={{color: 'green'}}>Current payment: {item.current.toFixed(2)}</Text>
-          <Text>Reset every: {item.autoReset} day(s)</Text>
+          <Text style={{fontWeight: 'bold', fontSize: 18, color: item.tomorrow?'red':'black'}}>{item.tomorrow ? "(EXP+1) " : ""}{item.name}</Text>
+          <Text style={{color: 'green', fontSize: 16}}>Current payment: {item.current.toFixed(2)}</Text>
           <Text style={{color: 'blue'}}>Reset in: {getDurationInEnglish(moment(), moment(item.nextReset))}</Text>
           <Text>
             Or precisely:{' '}
-            {moment(item.nextReset).format('DD/MM HH:mm')} 
+            {moment(item.nextReset).format('DD/MM HH:mm')} (every {item.autoReset} days)
           </Text>
           <Text>
             Count: {item.count} / {item.maxCount}{' '}
