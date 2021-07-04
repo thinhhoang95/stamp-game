@@ -52,7 +52,7 @@ let Salary = (props) => {
     const renderItem = ({item}) => {
         return(
             <TouchableWithoutFeedback onPress={ () => addStamp(item)}>
-                <View>
+                <View style={{margin: 16}}>
                     <Text>SN: {item.sn}</Text>
                     <Text>Content: {item.content}</Text>
                     <Text>Value: {item.value}</Text>

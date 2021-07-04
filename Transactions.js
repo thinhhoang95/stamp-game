@@ -121,7 +121,7 @@ let Transactions = (props) => {
 
   const renderItem = ({item}) => {
     return (
-      <View>
+      <View style={{margin: 16}}>
         <Text>Date: {item.date}</Text>
         <Text>Amount: {Number(item.amount).toFixed(2)}</Text>
         <Text>{item.description}</Text>

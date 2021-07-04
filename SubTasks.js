@@ -124,7 +124,7 @@ let SubTasks = (props) => {
     const renderItem = ({item}) => {
         return(
             <TouchableWithoutFeedback onPress={ () => actionOnRow(item)}>
-              <View>
+              <View style={{margin: 16}}>
                   <Text>Subtask: {item.sname}</Text>
                   <Text>Amount: {item.finish}</Text>
                   <Text>Serial: {item.sn}</Text>

@@ -130,9 +130,9 @@ let Home = (props) => {
                 </View>
                 <View style={styles.controls_bg}>
                     <View style={{alignSelf: 'center', flex: 1, paddingBottom: 40, paddingHorizontal: 10}}>
-                        <Text style={{textAlign: 'center'}}>Keep your belief and insight. You will become a wiser, more knowledgable and you will enjoy your success later.</Text>
                         <Text style={{fontWeight: 'bold', textAlign: 'center'}}> Hard work puts you in the place where luck shall find you.</Text>
                         <Text style={{fontWeight: 'bold', color: 'blue', textAlign: 'center'}}> Hold on and Keep on going!</Text>
+                        <Text style={{fontWeight: 'bold', color: 'blue', textAlign: 'center'}}> Make your time count! </Text>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row'}}>
                         <TextInput style={{ height: 40, width: 120, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeSpendValue(text)} value={spendValue}></TextInput><Button title="SPEND" onPress={spendMoneyHandler}></Button> 
@@ -141,18 +141,18 @@ let Home = (props) => {
                         <Button title="COLLECT STAMP" onPress={() => props.navigation.navigate('Scanstamp')}></Button> 
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
-                        <Text style={{color: 'blue'}} onPress={() => props.navigation.navigate('Transactions')}>View transactions</Text>
+                        <Button title="REWARD HABITS" color='green' onPress={() => props.navigation.navigate('Habits')}></Button>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
-                        <Text style={{color: 'blue'}} onPress={() => props.navigation.navigate('Salary')}>Claim salary</Text>
+                        <Button title="CLAIM SALARY" color='black' onPress={() => props.navigation.navigate('Salary')}></Button>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
-                        <Text style={{color: 'blue'}} onPress={() => props.navigation.navigate('Habits')}>Reward Habits (Beta)</Text>
-                    </View>
-                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 80}}>
-                        <Text style={{color: 'blue'}} onPress={nuclearResetHandler}>Reset balance (!)</Text>
+                        <Text style={{color: 'blue', padding: 8}} onPress={() => props.navigation.navigate('Transactions')}>View transactions</Text>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
+                        <Button title="RESET BALANCE" color="red" onPress={nuclearResetHandler}></Button>
+                    </View>
+                    <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 8}}>
                         <Text>Designed by Thinh Hoang in Toulouse, France</Text>
                     </View>
                 </View>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
         flex: 1,
     }, 
     money_bg: {
-        backgroundColor: 'blue',
+        backgroundColor: 'green',
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 60

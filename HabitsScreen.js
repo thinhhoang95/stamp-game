@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   Alert,
+  Button
 } from 'react-native';
 import {connect} from 'react-redux';
 import firestore, {firebase} from '@react-native-firebase/firestore';
@@ -14,6 +15,16 @@ import moment from 'moment';
 
 let HabitsScreen = (props) => {
   const [habits, setHabits] = useState([]);
+  const [orderMode, setOrderMode] = useState('DAILY');
+
+  useLayoutEffect(() => {
+    props.navigation.setOptions({
+      headerRight: () => (
+      <View style={{flex: 1, flexDirection: 'row'}}>
+        <Button onPress={() => orderHabits()} title={orderMode}></Button>
+      </View>),
+    });
+  }, [props.navigation, habits, orderMode]);
 
   const adjustTimeTo2AM = (date) => {
     let nextReset = moment().set('year', date.get('year'));
@@ -31,6 +42,26 @@ let HabitsScreen = (props) => {
     return nextReset;
   };
 
+  const orderHabits = () => {
+    // console.log(habits)
+    let mHabits = Object.assign([], habits)
+    // console.log('Ordering habits: ', orderMode)
+    if (orderMode == 'EXPIRE')
+    {
+      setOrderMode('DAILY')
+      mHabits.sort((a,b) => {
+        return a.order - b.order
+      })
+      setHabits(mHabits)
+    }
+    if (orderMode == 'DAILY')
+    {
+      setOrderMode('EXPIRE')
+      mHabits.sort((a, b) => -b.nextReset + a.nextReset);
+      setHabits(mHabits);
+    }
+  }
+
   useEffect(() => {
     // Query the habits and display into the list
     firestore()
@@ -40,12 +71,12 @@ let HabitsScreen = (props) => {
         let mHabits = [];
         let now = moment().valueOf();
         snapshot.forEach((sns) => {
-          let doc = sns.data();
+          let doc = Object.assign({}, sns.data());
           doc.lastReset = moment(doc.lastDone.toDate()).valueOf(); // unix timestamp in milisecs
           doc.nextReset = adjustTimeTo2AM(moment(doc.lastReset))
             .add(doc.autoReset, 'day')
             .valueOf();
-          //console.log(moment(doc.lastReset).format('DD/MM/YYYY HH:mm:ss'));
+          console.log(moment(doc.nextReset).format('DD/MM/YYYY HH:mm:ss'));
           // For expired habits, reset the lastDone date to today
           if (now > doc.nextReset) {
             console.log(
@@ -58,18 +89,13 @@ let HabitsScreen = (props) => {
               .add(doc.autoReset, 'd')
               .valueOf();
             doc.current = doc.start;
-            doc.lastDone = firebase.firestore.Timestamp.fromDate(
-              moment(doc.lastReset).toDate(),
-            );
+            doc.lastDone = firebase.firestore.Timestamp.fromDate(new Date());
+            doc.current = doc.start;
+            doc.count = 0;
             firestore()
               .collection('habits')
               .doc(doc.id)
-              .set({
-                ...doc,
-                lastDone: firebase.firestore.Timestamp.fromDate(new Date()),
-                current: doc.start,
-                count: 0,
-              });
+              .set(doc);
           }
           // Append the count and maxCount fields if the doc in database does not have those.
           // By default, these fields not existing means it has only to be done ONCE every x days 
@@ -83,6 +109,7 @@ let HabitsScreen = (props) => {
           if (moment(doc.nextReset).diff(moment(), 'h') < 25)
           {
             doc.tomorrow = true
+            doc.order -= 100
           } else {
             doc.tomorrow = false
           }
@@ -92,7 +119,9 @@ let HabitsScreen = (props) => {
         mHabits = mHabits.filter((x) => {
           return now > x.lastReset;
         });
-        mHabits = mHabits.sort((a, b) => -b.nextReset + a.nextReset);
+        mHabits.sort((a,b) => {
+          return a.order - b.order
+        })
         setHabits(mHabits);
       });
   }, []);
@@ -166,14 +195,10 @@ let HabitsScreen = (props) => {
                 h.current + h.increment > h.max
                   ? h.max
                   : h.current + h.increment;
-              docRef.set({
-                ...h,
-                lastDone: firebase.firestore.Timestamp.fromDate(
-                  moment(h.nextReset).toDate(),
-                ),
-                current: newCurrent,
-                count: 0,
-              });
+              h.lastDone = firebase.firestore.Timestamp.fromDate(moment(h.nextReset).toDate());
+              h.current = newCurrent;
+              h.count = 0;
+              docRef.set(h);
 
               props.addTransaction(
                 'Habit payment: ' + h.name + '.',
@@ -194,10 +219,9 @@ let HabitsScreen = (props) => {
                 ],
               );
             } else {
-              docRef.set({
-                ...h,
-                count: h.count + 1,
-              });
+              // console.log(h);
+              h.count += 1;
+              docRef.set(h);
               Alert.alert('Keep going', 'Habit count was increased.', [
                 {
                   text: 'OK',
@@ -221,14 +245,15 @@ let HabitsScreen = (props) => {
     let howLongTillNextReset = getDurationInEnglish(moment.duration(moment(item.nextReset).diff(moment())))
     return (
       <TouchableWithoutFeedback onPress={() => payMyHabit(item.id)}>
-        <View>
-          <Text style={{fontWeight: 'bold'}}>{item.tomorrow ? "(EXP+1) " : ""}{item.name}</Text>
+        <View style={{margin: 16}}>
+          <Text style={{fontWeight: 'bold', color: item.tomorrow?'red':'black'}}>{item.tomorrow ? "(EXP+1) " : ""}{item.name}</Text>
           <Text>Description: {item.descr}</Text>
-          <Text>Current payment: {item.current.toFixed(2)}</Text>
+          <Text style={{color: 'green'}}>Current payment: {item.current.toFixed(2)}</Text>
           <Text>Reset every: {item.autoReset} day(s)</Text>
+          <Text style={{color: 'blue'}}>Reset in: {getDurationInEnglish(moment(), moment(item.nextReset))}</Text>
           <Text>
-            Next reset:{' '}
-            {moment(item.nextReset).format('DD/MM HH:mm')} in {getDurationInEnglish(moment(), moment(item.nextReset))}
+            Or precisely:{' '}
+            {moment(item.nextReset).format('DD/MM HH:mm')} 
           </Text>
           <Text>
             Count: {item.count} / {item.maxCount}{' '}
