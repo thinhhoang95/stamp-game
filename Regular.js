@@ -48,7 +48,7 @@ let Regular = (props) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={{flexDirection: 'column'}}>
+            <View style={{flexDirection: 'column', padding: 16}}>
                 <Text>Content: {stamp.content} </Text>
                 <Text>Value: {stamp.finish} </Text>
                 <Text>Expiry date: {moment(stamp.expiryDate).format("DD/MM/YYYY HH:mm")} </Text>

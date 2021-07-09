@@ -117,6 +117,10 @@ let Home = (props) => {
         return {mtodayEarned, mtodaySpent}
     }
 
+    const openUselessScreen = () => {
+        props.navigation.navigate('UselessScreen')
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
@@ -156,7 +160,7 @@ let Home = (props) => {
                         <Button title="RESET BALANCE" color="red" onPress={nuclearResetHandler}></Button>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 8}}>
-                        <Text>Designed by Thinh Hoang in Toulouse, France</Text>
+                        <Text onPress={openUselessScreen}>Designed by Thinh Hoang in Toulouse, France</Text>
                     </View>
                 </View>
             </ScrollView>

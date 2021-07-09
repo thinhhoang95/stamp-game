@@ -50,7 +50,7 @@ let HabitsScreen = (props) => {
     {
       setOrderMode('DAILY')
       mHabits.sort((a,b) => {
-        return a.order - b.order
+        return a.orderx - b.orderx
       })
       setHabits(mHabits)
     }
@@ -109,9 +109,10 @@ let HabitsScreen = (props) => {
           if (moment(doc.nextReset).diff(moment(), 'h') < 25)
           {
             doc.tomorrow = true
-            doc.order -= 100
+            doc.orderx = doc.order - 100
           } else {
             doc.tomorrow = false
+            doc.orderx = doc.order
           }
           mHabits.push(doc);
         });
@@ -120,7 +121,7 @@ let HabitsScreen = (props) => {
           return now > x.lastReset;
         });
         mHabits.sort((a,b) => {
-          return a.order - b.order
+          return a.orderx - b.orderx
         })
         setHabits(mHabits);
       });

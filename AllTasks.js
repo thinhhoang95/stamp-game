@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, Button, Alert, TextInput, ScrollV
 import { connect } from 'react-redux';
 import  { newTransactionAdd } from './AllActions'
 import firestore from '@react-native-firebase/firestore';
+import moment from 'moment';
 
 let AllTasks = (props) => {
 
@@ -19,7 +20,8 @@ let AllTasks = (props) => {
                     'sn': data.sn,
                     'id': data.id,
                     'description': data.description,
-                    'finish': data.finish
+                    'finish': data.finish,
+                    'expiryDate': moment(data.expiredDate.toDate())
                 })
             })
             console.log(vStamps)
@@ -50,7 +52,7 @@ let AllTasks = (props) => {
                 <View style={{margin: 16}}>
                     <Text style={{fontSize: 24, fontWeight: 'bold', color: 'blue'}}>ID: {item.id}</Text>
                     <Text style={{color: 'green', fontWeight: 'bold'}}>Description: {item.description}</Text>
-                    <Text>Value: {item.finish}</Text>
+                    <Text>Expires on: {item.expiryDate.format('DD/MM/YYYY HH:mm')}. Value: {item.finish}</Text>
                 </View>
             </TouchableWithoutFeedback>
         )

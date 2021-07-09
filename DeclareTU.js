@@ -62,6 +62,9 @@ let DeclareTU = (props) => {
                         <View style={{width: 20, height: 20}}></View> 
                         <Button title="ADD" onPress={addBtnHandler}></Button> 
                     </View>
+                    <View>
+                        <Text>Last updated: {moment(props.all.tu_date).format('ddd DD/MM/YYYY HH:mm:ss')}</Text>
+                    </View>
                     <View style={{marginTop: 40}}>
                         <Button color='green' title="COMMIT" onPress={() => commitBtnHandler()}></Button>
                     </View>

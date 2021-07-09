@@ -3,7 +3,8 @@ import { combineReducers } from 'redux';
 const INITIAL_STATE = {
   balance: 0,
   transactions: [],
-  tu: 0
+  tu: 0,
+  tu_date: new Date()
 };
 
 const allReducer = (state = INITIAL_STATE, action) => {
@@ -28,9 +29,11 @@ const allReducer = (state = INITIAL_STATE, action) => {
       return state_prime
     case 'ADD_TU': 
       state_prime.tu = state_prime.tu + action.tu
+      state_prime.tu_date = new Date()
       return state_prime
     case 'RESET_TU':
       state_prime.tu = 0
+      state_prime.tu_date = new Date()
       return state_prime
     default:
       return state

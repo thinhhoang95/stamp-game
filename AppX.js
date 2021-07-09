@@ -11,6 +11,7 @@ import HabitsScreen from './HabitsScreen'
 import Regular from './Regular'
 import AllTasks from './AllTasks'
 import DeclareTU from './DeclareTU'
+import UselessScreen from './UselessScreen'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react';
 import allReducers from './AllReducers'
@@ -63,6 +64,7 @@ const AppX = () => {
             <Stack.Screen name="Regular" component={Regular} />
             <Stack.Screen name="AllTasks" component={AllTasks} />
             <Stack.Screen name="DeclareTU" component={DeclareTU} />
+            <Stack.Screen name="UselessScreen" component={UselessScreen} />
           </Stack.Navigator>
         </NavigationContainer>
     </PersistGate>
