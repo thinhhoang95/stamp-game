@@ -58,7 +58,7 @@ let DeclareTU = (props) => {
                         <Text style={{fontSize: 24}}>Declared TUs: {props.all.tu}</Text>
                     </View>
                     <View style={{flexDirection: 'row'}}>
-                        <TextInput style={{ height: 40, width: 120, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeTU(text)} value={String(tu)}></TextInput>  
+                        <TextInput style={{ height: 40, width: 120, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeTU(text)} value={String(tu)} keyboardType='numeric'></TextInput>  
                         <View style={{width: 20, height: 20}}></View> 
                         <Button title="ADD" onPress={addBtnHandler}></Button> 
                     </View>
