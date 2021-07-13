@@ -28,10 +28,9 @@ let HabitsScreen = (props) => {
 
   const adjustTimeTo2AM = (date) => {
     let nextReset = moment().set('year', date.get('year'));
-    let now = moment()
     nextReset.set('month', date.get('month'));
     nextReset.set('date', date.get('date'));
-    if (now.get('hour') < 2)
+    if (date.get('hour') < 2)
     {
       // If we have passed 12AM but not 2AM today, this function should not turn the clock forward
       // but instead, the clock must be ensured to be always turned backward

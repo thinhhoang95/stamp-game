@@ -8,8 +8,14 @@ import moment from 'moment'
 
 let Home = (props) => {
     const [spendValue, onChangeSpendValue] = useState('0.00')
+    const [spendingReason, setSpendingReason] = useState('')
 
     const spendMoneyHandler = () => { // spend money onclick
+        if (spendingReason == '' || spendValue <= 0)
+        {
+            Alert.alert("Error", "The spending reason and spend amount must be valid");
+            return
+        }
         Alert.alert(
             "Spending confirmation",
             "Do you confirm to withdraw " + Number(spendValue).toFixed(2) + " from your balance? This transaction cannot be undone!",
@@ -20,8 +26,9 @@ let Home = (props) => {
                 style: "cancel"
               },
               { text: "OK", onPress: () => {
-                props.minusTransaction('Debit (withdrawal)', spendValue)
+                props.minusTransaction('Debit: ' + spendingReason, spendValue)
                 onChangeSpendValue('0.00')
+                setSpendingReason('')
               } }
             ],
             { cancelable: false }
@@ -65,10 +72,11 @@ let Home = (props) => {
             return now.diff(tDate, 'hour') <= 24
         })
         todayTrans.forEach((t) => {
-            mtodayEarned += t.description.indexOf('withdrawal') == -1 ? Number(t.amount) : 0
-            mtodaySpent += t.description.indexOf('withdrawal') >= 0 ? Number(t.amount) : 0
+            mtodayEarned += t.description.indexOf('Debit') == -1 ? Number(t.amount) : 0
+            mtodaySpent += t.description.indexOf('Debit') >= 0 ? Number(t.amount) : 0
         })
-        return {mtodayEarned, mtodaySpent}
+        let delta = mtodayEarned - mtodaySpent
+        return {mtodayEarned, mtodaySpent, delta}
     }
 
     
@@ -86,10 +94,11 @@ let Home = (props) => {
             return now.diff(tDate, 'hour') <= 168 // 1 week has 768 hours
         })
         todayTrans.forEach((t) => {
-            mtodayEarned += t.description.indexOf('withdrawal') == -1 ? Number(t.amount) : 0
-            mtodaySpent += t.description.indexOf('withdrawal') >= 0 ? Number(t.amount) : 0
+            mtodayEarned += t.description.indexOf('Debit') == -1 ? Number(t.amount) : 0
+            mtodaySpent += t.description.indexOf('Debit') >= 0 ? Number(t.amount) : 0
         })
-        return {mtodayEarned, mtodaySpent}
+        let delta = mtodayEarned - mtodaySpent
+        return {mtodayEarned, mtodaySpent, delta}
     }
 
     const getThisMonthEarnedAmount = (transactions) => {
@@ -111,10 +120,11 @@ let Home = (props) => {
         })
         // console.log(todayTrans)
         todayTrans.forEach((t) => {
-            mtodayEarned += t.description.indexOf('withdrawal') == -1 ? Number(t.amount) : 0
-            mtodaySpent += t.description.indexOf('withdrawal') >= 0 ? Number(t.amount) : 0
+            mtodayEarned += t.description.indexOf('Debit') == -1 ? Number(t.amount) : 0
+            mtodaySpent += t.description.indexOf('Debit') >= 0 ? Number(t.amount) : 0
         })
-        return {mtodayEarned, mtodaySpent}
+        let delta = mtodayEarned - mtodaySpent
+        return {mtodayEarned, mtodaySpent, delta}
     }
 
     const openUselessScreen = () => {
@@ -127,9 +137,9 @@ let Home = (props) => {
                 <View style={styles.money_bg}>
                     <Text style={styles.money_bg_text}> Your balance is </Text>
                     <Text style={styles.balance_amount}> { Number(props.all.balance).toFixed(2) } </Text>
-                    <Text style={styles.today_earned}>Daily: +{getTodayEarnedAmount(props.all.transactions.slice(-50)).mtodayEarned.toFixed(2)} / -{getTodayEarnedAmount(props.all.transactions.slice(-50)).mtodaySpent.toFixed(2)}</Text>
-                    <Text style={styles.today_earned}>Weekly: +{getThisWeekEarnedAmount(props.all.transactions.slice(-150)).mtodayEarned.toFixed(2)} / -{getThisWeekEarnedAmount(props.all.transactions.slice(-150)).mtodaySpent.toFixed(2)}</Text>
-                    <Text style={styles.today_earned}>Monthly: +{getThisMonthEarnedAmount(props.all.transactions.slice(-400)).mtodayEarned.toFixed(2)} / -{getThisMonthEarnedAmount(props.all.transactions.slice(-400)).mtodaySpent.toFixed(2)}</Text>
+                    <Text style={styles.today_earned}>Daily: +{getTodayEarnedAmount(props.all.transactions.slice(-50)).mtodayEarned.toFixed(2)} / -{getTodayEarnedAmount(props.all.transactions.slice(-50)).mtodaySpent.toFixed(2)} / {getTodayEarnedAmount(props.all.transactions.slice(-50)).delta.toFixed(2)}</Text>
+                    <Text style={styles.today_earned}>Weekly: +{getThisWeekEarnedAmount(props.all.transactions.slice(-150)).mtodayEarned.toFixed(2)} / -{getThisWeekEarnedAmount(props.all.transactions.slice(-150)).mtodaySpent.toFixed(2)}  / {getThisWeekEarnedAmount(props.all.transactions.slice(-50)).delta.toFixed(2)}</Text>
+                    <Text style={styles.today_earned}>Monthly: +{getThisMonthEarnedAmount(props.all.transactions.slice(-400)).mtodayEarned.toFixed(2)} / -{getThisMonthEarnedAmount(props.all.transactions.slice(-400)).mtodaySpent.toFixed(2)} /  / {getThisMonthEarnedAmount(props.all.transactions.slice(-50)).delta.toFixed(2)}</Text>
                 
                 </View>
                 <View style={styles.controls_bg}>
@@ -139,7 +149,9 @@ let Home = (props) => {
                         <Text style={{fontWeight: 'bold', color: 'blue', textAlign: 'center'}}> Make your time count! </Text>
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row'}}>
-                        <TextInput style={{ height: 40, width: 120, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeSpendValue(text)} value={spendValue}></TextInput><Button title="SPEND" onPress={spendMoneyHandler}></Button> 
+                        <TextInput style={{ height: 40, flex: 1, borderColor: 'gray', borderWidth: 1 }} onChangeText={text => onChangeSpendValue(text)} value={spendValue} keyboardType='numeric'></TextInput>
+                        <TextInput style={{ height: 40, flex: 2, borderColor: 'gray', borderWidth: 1 }} placeholder="Reason for spending" value={spendingReason} onChangeText={(text)=>setSpendingReason(text)}></TextInput>
+                        <Button title="SPEND" onPress={spendMoneyHandler}></Button> 
                     </View>
                     <View style={{alignSelf: 'center', flex: 1, flexDirection: 'row', marginTop: 20}}>
                         <Button title="COLLECT STAMP" onPress={() => props.navigation.navigate('Scanstamp')}></Button> 

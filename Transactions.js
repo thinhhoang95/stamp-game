@@ -21,7 +21,7 @@ const RNFS = require('react-native-fs');
 
 let Transactions = (props) => {
 
-  const requestFilePermissionR = async () => {
+  const requestFilePermissionR = async (action) => {
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
@@ -36,7 +36,7 @@ let Transactions = (props) => {
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         console.log("Read storage permission granted")
-        requestFilePermissionW()
+        requestFilePermissionW(action)
       } else {
         console.log("Read Storage permission denied");
       }
@@ -45,7 +45,7 @@ let Transactions = (props) => {
     }
   };
 
-  const requestFilePermissionW = async () => {
+  const requestFilePermissionW = async (action) => {
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -60,7 +60,14 @@ let Transactions = (props) => {
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         console.log("Write storage permission granted")
-        backUp()
+        if (action == 'backup')
+        {
+          backUp()
+        }
+        else if (action == "restore")
+        {
+          restoreBackUpTap()
+        }
       } else {
         console.log("Write Storage permission denied");
       }
@@ -87,13 +94,17 @@ let Transactions = (props) => {
 
   const restoreBackUpTap = () => {
     RNFS.readFile(RNFS.ExternalStorageDirectoryPath + '/transactions.json', 'utf8').then(res => {
-      let ob = JSON.parse(res)
-      props.performRestoreBackup(ob.balance, ob.transactions)
-      ToastAndroid.show('Backup file has been successfully restored from local storage', ToastAndroid.SHORT)
-      
+      try{
+        let ob = JSON.parse(res)
+        props.performRestoreBackup(ob.balance, ob.transactions)
+        ToastAndroid.show('Backup file has been successfully restored from local storage', ToastAndroid.SHORT)
+      } catch (err) {
+        console.log(err)
+      }
     })
     .catch(err => {
         console.log(err.message, err.code);
+        console.trace();
     });
   }
 
@@ -101,8 +112,8 @@ let Transactions = (props) => {
     props.navigation.setOptions({
       headerRight: () => (
       <View style={{flex: 1, flexDirection: 'row'}}>
-        <Button onPress={requestFilePermissionR} title="BACK UP"></Button>
-        <Button onPress={restoreBackUpTap} title="RESTORE"></Button>
+        <Button onPress={() => requestFilePermissionR('backup')} title="BACK UP"></Button>
+        <Button onPress={() => requestFilePermissionR('restore')} title="RESTORE"></Button>
       </View>),
     });
   }, [props.navigation]);

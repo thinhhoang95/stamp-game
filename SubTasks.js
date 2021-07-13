@@ -8,6 +8,7 @@ import moment from 'moment';
 let SubTasks = (props) => {
 
     const [subtasks, setSubtasks] = useState([])
+    const [data, setData] = useState({})
 
     useEffect(() => {
       console.log('Querying SN ' + props.route.params.sn)
@@ -17,6 +18,7 @@ let SubTasks = (props) => {
         let vsubtasks = []
         let t = snapshot.data()
         let sta = t.subs
+        setData(t)
         let taskExpiryTime = moment(t.expired) 
         if (taskExpiryTime.diff(moment()) < 0)
         {
@@ -31,6 +33,7 @@ let SubTasks = (props) => {
           return // Do not proceed further
         }
         sta.forEach((st) => {
+          // Only add stamps that do not have the serial numbers that already existed in our local database
           let snIdx = props.all.transactions.findIndex(x => x.sn == st.sn)
           
           if (snIdx == -1)
@@ -39,11 +42,13 @@ let SubTasks = (props) => {
               {
                   sname: t.id + ": " + st.sname,
                   finish: st.finish,
-                  sn: st.sn
+                  sn: st.sn,
+                  'type': 'subtask'
               }
           )
           }
         })
+        // Add the task stamp to end of the list (the task comprises of many subtasks, and has a prize too)
         let snIdx = props.all.transactions.findIndex(x => x.sn == t.sn)
         if (snIdx == -1)
         {
@@ -51,7 +56,8 @@ let SubTasks = (props) => {
               {
                   sname: t.id + ': task reward (on time constraint)',
                   finish: t.finish,
-                  sn: t.sn
+                  sn: t.sn,
+                  'type': 'task'
               }
           )
         }
@@ -112,6 +118,19 @@ let SubTasks = (props) => {
     const actionOnRow = (item) => {
       // On tap, add the corresponding transaction
       props.addTransaction(item.sname, item.finish, item.sn)
+      // Remove the subtask or the task from the internet database when claimed
+      if (item.type == 'subtask')
+      {
+        let newStamp = Object.assign({}, data)
+        console.log(newStamp)
+        newStamp.subs = newStamp.subs.filter(o => o.sn == item.sn)
+        firestore().collection('subtasks').doc(props.route.params.sn).set(newStamp)
+        console.log('Subtask removed from the task stamp')
+      } else if (item.type == 'task')
+      {
+        firestore().collection('subtasks').doc(props.route.params.sn).delete()
+        console.log('Stamp removed from the database')
+      }
       Alert.alert(
         "Transaction added",
         "You have claimed the reward for this subtask. Have a good work!",

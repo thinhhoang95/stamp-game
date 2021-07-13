@@ -21,7 +21,7 @@ let AllTasks = (props) => {
                     'id': data.id,
                     'description': data.description,
                     'finish': data.finish,
-                    'expiryDate': moment(data.expiredDate.toDate())
+                    'expiryDate': moment(data.expired)
                 })
             })
             console.log(vStamps)
