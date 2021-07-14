@@ -123,7 +123,7 @@ let SubTasks = (props) => {
       {
         let newStamp = Object.assign({}, data)
         console.log(newStamp)
-        newStamp.subs = newStamp.subs.filter(o => o.sn == item.sn)
+        newStamp.subs = newStamp.subs.filter(o => o.sn != item.sn)
         firestore().collection('subtasks').doc(props.route.params.sn).set(newStamp)
         console.log('Subtask removed from the task stamp')
       } else if (item.type == 'task')
